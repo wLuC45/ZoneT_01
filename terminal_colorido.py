@@ -1,0 +1,7 @@
+ResetCor = "\033[0m"
+Negrito = "\033[1m"
+Verde = "\033[92m"
+Vermelho = "\033[91m"
+Amarelo = "\033[93m"
+Azul = "\033[94m"
+Cinza = "\033[90m"
