@@ -1,0 +1,27 @@
+# torrc base — configuração do daemon Tor para o ZoneT_01.
+# Cliente apenas; nunca atua como relay ou exit.
+#
+# O entrypoint gera um torrc efetivo a partir deste arquivo e, se o operador
+# fornecer um arquivo de bridges, acrescenta as diretivas correspondentes.
+
+SocksPort 127.0.0.1:9050 IsolateDestAddr IsolateDestPort
+ControlPort 127.0.0.1:9051
+CookieAuthentication 1
+CookieAuthFile /var/lib/tor/control_auth_cookie
+
+DataDirectory /var/lib/tor
+
+# Renovação de circuito: circuitos "sujos" são aposentados após 10 minutos.
+MaxCircuitDirtiness 600
+NewCircuitPeriod 120
+CircuitBuildTimeout 60
+
+# Postura de cliente puro.
+ClientOnly 1
+ExitPolicy reject *:*
+
+# Higiene operacional: sem escrita em disco e log mínimo. O log vai para o
+# stdout, que é descartado quando o contêiner roda com --log-driver none.
+AvoidDiskWrites 1
+SafeLogging 1
+Log warn stdout

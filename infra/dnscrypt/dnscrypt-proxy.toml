@@ -1,0 +1,70 @@
+# dnscrypt-proxy.toml — resolvedor DNS criptografado e anonimizado do ZoneT_01.
+#
+# Toda consulta DNS recursiva do contêiner chega aqui (127.0.0.1:53) e sai
+# encapsulada em DNSCrypt, através de relays anonimizados, por cima do SOCKS5
+# do Tor. O IP de origem nunca é revelado ao resolvedor recursivo final.
+
+listen_addresses = ['127.0.0.1:53']
+max_clients = 250
+
+ipv4_servers = true
+ipv6_servers = false
+dnscrypt_servers = true
+doh_servers = false
+
+require_dnssec = false
+require_nolog = true
+require_nofilter = true
+
+# --- OBRIGATÓRIO ao sair por um proxy SOCKS -------------------------------
+# SOCKS5 transporta apenas TCP; sem force_tcp o dnscrypt-proxy tentaria UDP
+# e o caminho pelo proxy falharia silenciosamente.
+force_tcp = true
+proxy = 'socks5://127.0.0.1:9050'
+timeout = 10000
+keepalive = 30
+
+# Resolvedores usados SOMENTE para baixar a lista de resolvedores na partida.
+bootstrap_resolvers = ['9.9.9.9:53', '1.1.1.1:53']
+ignore_system_dns = true
+
+# A sonda de rede aponta para a porta SOCKS do Tor — assim o dnscrypt-proxy
+# só considera a rede pronta quando o Tor estiver acessível.
+netprobe_address = '127.0.0.1:9050'
+netprobe_timeout = 60
+
+# Cache (em tmpfs, volátil).
+cache = true
+cache_size = 4096
+cache_min_ttl = 60
+cache_max_ttl = 86400
+
+# Log mínimo (4 = apenas erros). O registro de consultas (query_log) é
+# deliberadamente mantido desativado: nenhum domínio consultado é gravado.
+log_level = 4
+
+# refresh_delay muito alto (1 ano): as listas embutidas na imagem são usadas
+# como estão e nunca são rebaixadas em tempo de execução. Isso elimina
+# qualquer busca HTTP no arranque, que poderia escapar da rede Tor. A
+# atualização das listas passa a ser feita reconstruindo a imagem.
+[sources]
+  [sources.public-resolvers]
+    urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md']
+    cache_file = '/var/cache/dnscrypt-proxy/public-resolvers.md'
+    minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+    refresh_delay = 8760
+  [sources.relays]
+    urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/relays.md']
+    cache_file = '/var/cache/dnscrypt-proxy/relays.md'
+    minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+    refresh_delay = 8760
+
+# --- DNS anonimizado ------------------------------------------------------
+# Cada consulta vai a um relay, que a encaminha ao resolvedor: o resolvedor
+# vê o IP do relay, nunca o do cliente.
+[anonymized_dns]
+  skip_incompatible = true
+
+  [[anonymized_dns.routes]]
+    server_name = '*'
+    via = ['*']

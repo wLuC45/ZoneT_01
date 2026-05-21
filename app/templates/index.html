@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZoneT_01</title>
+  <link rel="icon" type="image/svg+xml"
+        href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+</head>
+<body>
+  <header class="topo">
+    <img class="logo" src="{{ url_for('static', filename='logo.svg') }}"
+         alt="ZoneT_01">
+    <span class="marca">ZoneT_01</span>
+    <span class="prompt">anonymous@zonet:~$</span>
+    <span class="espaco"></span>
+    <span class="subtitulo">reconhecimento DNS anônimo</span>
+  </header>
+
+  <main>
+    <!-- Tiles de status -->
+    <section class="tiles">
+      <div class="tile" id="tile-tor">
+        <span class="tile-rotulo">Tor</span>
+        <span class="tile-valor" id="t-tor">&middot;&middot;&middot;</span>
+      </div>
+      <div class="tile" id="tile-dns">
+        <span class="tile-rotulo">dnscrypt</span>
+        <span class="tile-valor" id="t-dns">&middot;&middot;&middot;</span>
+      </div>
+      <div class="tile">
+        <span class="tile-rotulo">scans na sessão</span>
+        <span class="tile-valor neutro" id="t-scans">0</span>
+      </div>
+      <div class="tile">
+        <span class="tile-rotulo">críticos</span>
+        <span class="tile-valor" id="t-criticos">0</span>
+      </div>
+    </section>
+
+    <!-- Carrossel hero (transição por fade) -->
+    <section class="hero" id="carrossel">
+      <div class="hero-palco" id="hero-palco">
+        <article class="slide ativo">
+          <h3>Pilha de anonimização</h3>
+          <ul class="kv">
+            <li><span>Tor (SOCKS 9050)</span><b id="pl-tor">-</b></li>
+            <li><span>dnscrypt-proxy (53)</span><b id="pl-dns">-</b></li>
+            <li><span>Renovação de circuito</span><b>a cada 10 min</b></li>
+            <li><span>Saída de rede</span><b>somente via Tor</b></li>
+          </ul>
+        </article>
+        <article class="slide">
+          <h3>Sessão</h3>
+          <ul class="kv">
+            <li><span>Scans realizados</span><b id="ss-total">0</b></li>
+            <li><span>Em execução</span><b id="ss-ativos">0</b></li>
+            <li><span>Crítico / Baixo</span><b id="ss-niveis">0 / 0</b></li>
+            <li><span>Persistência</span><b>memória volátil</b></li>
+          </ul>
+        </article>
+        <article class="slide">
+          <h3>OPSEC</h3>
+          <ul class="lista-seca">
+            <li>Toda consulta sai pela rede Tor; falha fechada sem o torsocks.</li>
+            <li>Sem logs em disco; estado apenas em memória volátil.</li>
+            <li>Geolocalização externa desativada salvo opt-in explícito.</li>
+            <li>Use somente contra alvos que você está autorizado a testar.</li>
+          </ul>
+        </article>
+        <article class="slide">
+          <h3>Transferência de zona (AXFR)</h3>
+          <p class="texto">
+            O AXFR replica uma zona DNS inteira entre servidores autoritativos.
+            Quando um servidor aceita esse pedido de qualquer origem, expõe
+            subdomínios, hosts internos e a topologia da rede. ZoneT_01 detecta
+            essa falha e classifica o risco.
+          </p>
+        </article>
+      </div>
+      <div class="hero-pontos" id="car-pontos"></div>
+    </section>
+
+    <!-- Área de scan -->
+    <section class="painel scan-painel">
+      <form id="formulario" class="linha-form">
+        <label for="alvo" class="rotulo">alvo</label>
+        <input type="text" id="alvo" name="alvo" autocomplete="off" required
+               placeholder="dominio.com ou IP">
+        <button type="submit" id="botao">escanear</button>
+        <label class="opcao">
+          <input type="checkbox" id="opt-portas">
+          varredura de portas via Tor (mais lenta)
+        </label>
+      </form>
+      <p id="mensagem-erro" class="erro oculto"></p>
+      <div id="painel-progresso" class="oculto progresso">
+        <div class="barra-externa"><div id="barra" class="barra-interna"></div></div>
+        <p id="etapa-atual" class="etapa"></p>
+      </div>
+    </section>
+
+    <!-- Resultado -->
+    <section class="painel">
+      <div id="resultado-vazio" class="vazio">
+        nenhum scan carregado &mdash; informe um alvo acima
+      </div>
+      <div id="painel-resultado" class="oculto">
+        <div class="cabecalho-resultado">
+          <span id="badge-risco" class="badge"></span>
+          <span id="resultado-alvo" class="alvo-titulo"></span>
+          <span class="espaco"></span>
+          <button id="btn-exportar" class="botao-secundario">baixar JSON</button>
+        </div>
+        <div id="conteudo-resultado"></div>
+      </div>
+    </section>
+
+    <!-- Histórico -->
+    <section class="painel">
+      <h2>histórico da sessão</h2>
+      <ul id="historico" class="historico"></ul>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    ZoneT_01 &middot; ferramenta de reconhecimento DNS &middot; uso autorizado
+  </footer>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
